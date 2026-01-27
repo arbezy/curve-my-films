@@ -30,6 +30,7 @@ func getReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: replace with db fetch
 	var rev = MovieReview{0, movieName, 10}
 
 	w.WriteHeader(http.StatusOK)
@@ -52,6 +53,7 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: replace with db fetch
 	var parentRev = MovieReview{0, "testmovie1", rating}
 	var childRev0 = MovieReview{1, "testmovie2", rating}
 	var childRev1 = MovieReview{2, "testmovie3", rating}
