@@ -1,14 +1,13 @@
 package main
 
+// TODO: put in cmd dir
+
 import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 )
-
-type OptionalInt struct {
-	val int
-}
 
 type MovieReview struct {
 	ReviewID  int    `json:"review_id"`
@@ -23,16 +22,39 @@ type RatingTreeNode struct {
 }
 
 func getReview(w http.ResponseWriter, r *http.Request) {
-	var rev = MovieReview{0, "testmovie", 5}
+	r.ParseForm()
+	movieName := r.Form.Get("moviename")
+
+	if len(movieName) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	var rev = MovieReview{0, movieName, 10}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(rev)
 }
 
 func getRatingTree(w http.ResponseWriter, r *http.Request) {
-	var parentRev = MovieReview{0, "testmovie1", 5}
-	var childRev0 = MovieReview{1, "testmovie2", 5}
-	var childRev1 = MovieReview{2, "testmovie3", 5}
+	r.ParseForm()
+	ratingStr := r.Form.Get("rating")
+
+	if len(ratingStr) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	rating, err := strconv.Atoi(ratingStr)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Cannot convert rating to integer")
+		return
+	}
+
+	var parentRev = MovieReview{0, "testmovie1", rating}
+	var childRev0 = MovieReview{1, "testmovie2", rating}
+	var childRev1 = MovieReview{2, "testmovie3", rating}
 
 	var node0 = RatingTreeNode{childRev0, nil, nil}
 	var node1 = RatingTreeNode{childRev1, nil, nil}
@@ -41,6 +63,15 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(tree)
+}
+
+// TODO: supplied with an updated tree ?
+func updateRatingTree(w http.ResponseWriter, r *http.Request) {
+	// TODO: parse new tree from request body
+	// TODO: perform db update
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode("success") // NOTE: if new tree not created in the front end then return new tree here
 }
 
 func handleRequests() {
