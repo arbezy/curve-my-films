@@ -1,8 +1,10 @@
 package main
 
 // TODO: put in cmd dir
+// TODO: move all handlers into a handlers.go file !
 
 import (
+	"database/sql"
 	"encoding/json"
 	"github.com/arbezy/curve-my-films/config"
 	"log"
@@ -11,11 +13,11 @@ import (
 )
 
 type MovieReview struct {
-	ReviewID  int    `json:"review_id"`
-	MovieName string `json:"movie_name"`
-	Rating    int    `json:"rating"`
-	leftPtr   int    `json:"left_ptr"`
-	rightPtr  int    `json:"right_ptr"`
+	ReviewID  int           `json:"review_id"`
+	MovieName string        `json:"movie_name"`
+	Rating    int           `json:"rating"`
+	leftPtr   sql.NullInt64 `json:"left_ptr"`
+	rightPtr  sql.NullInt64 `json:"right_ptr"`
 }
 
 type RatingTreeNode struct {
