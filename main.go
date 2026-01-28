@@ -13,6 +13,8 @@ type MovieReview struct {
 	ReviewID  int    `json:"review_id"`
 	MovieName string `json:"movie_name"`
 	Rating    int    `json:"rating"`
+	leftPtr   int    `json:"left_ptr"`
+	rightPtr  int    `json:"right_ptr"`
 }
 
 type RatingTreeNode struct {
@@ -20,6 +22,8 @@ type RatingTreeNode struct {
 	Left   *RatingTreeNode `json:"left"`
 	Right  *RatingTreeNode `json:"right"`
 }
+
+var rr = ReviewRepository{}
 
 func getReview(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -30,8 +34,10 @@ func getReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: replace with db fetch
-	var rev = MovieReview{0, movieName, 10}
+	rev, err := rr.ReadMovieReview(movieName)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(rev)
@@ -54,9 +60,9 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: replace with db fetch
-	var parentRev = MovieReview{0, "testmovie1", rating}
-	var childRev0 = MovieReview{1, "testmovie2", rating}
-	var childRev1 = MovieReview{2, "testmovie3", rating}
+	var parentRev = MovieReview{ReviewID: 0, MovieName: "testmovie1", Rating: rating}
+	var childRev0 = MovieReview{ReviewID: 1, MovieName: "testmovie2", Rating: rating}
+	var childRev1 = MovieReview{ReviewID: 2, MovieName: "testmovie3", Rating: rating}
 
 	var node0 = RatingTreeNode{childRev0, nil, nil}
 	var node1 = RatingTreeNode{childRev1, nil, nil}
@@ -83,5 +89,10 @@ func handleRequests() {
 }
 
 func main() {
+	reviewRepo, err := InitDB()
+	rr = reviewRepo
+	if err != nil {
+		log.Fatal(err)
+	}
 	handleRequests()
 }

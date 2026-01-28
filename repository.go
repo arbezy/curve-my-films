@@ -23,9 +23,18 @@ func GetConfig() *mysql.Config {
 	return cfg
 }
 
+// TODO: should probs move this to a different file too
+func InitDB() (ReviewRepository, error) {
+	db, err := sql.Open("mysql", GetConfig().FormatDSN())
+	if err != nil {
+		return ReviewRepository{}, err
+	}
+	return ReviewRepository{db}, nil
+}
+
 // TODO: LEFT OFF HERE! wire this up to the handler
 func (rr *ReviewRepository) ReadMovieReview(movieName string) (*MovieReview, error) {
-	query := fmt.Sprintf("SELECT * FROM reviews WHERE movie_name=%s;", movieName)
+	query := fmt.Sprintf("SELECT * FROM reviews WHERE movie_name='%s';", movieName)
 	results, err := rr.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -33,7 +42,7 @@ func (rr *ReviewRepository) ReadMovieReview(movieName string) (*MovieReview, err
 
 	rev := &MovieReview{}
 	if results.Next() {
-		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating)
+		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.leftPtr, &rev.rightPtr)
 		if err != nil {
 			return nil, err
 		}
