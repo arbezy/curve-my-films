@@ -4,6 +4,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/arbezy/curve-my-films/config"
 	"log"
 	"net/http"
 	"strconv"
@@ -89,10 +90,16 @@ func handleRequests() {
 }
 
 func main() {
+	err := config.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	reviewRepo, err := InitDB()
 	rr = reviewRepo
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	handleRequests()
 }

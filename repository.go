@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/arbezy/curve-my-films/config"
 	"github.com/go-sql-driver/mysql"
 )
 
@@ -11,21 +12,20 @@ type ReviewRepository struct {
 	db *sql.DB
 }
 
-// TODO: move this into a config.go file and read these values from a .env file
-func GetConfig() *mysql.Config {
+func GetDBConfig() *mysql.Config {
 	var cfg = mysql.NewConfig()
-	cfg.User = 
-	cfg.Passwd = 
-	cfg.Net = "tcp"
-	cfg.Addr = "127.0.0.1:3306"
-	cfg.DBName = "curvemyfilms"
+	cfg.User = config.DatabaseConfig.DB_USERNAME
+	cfg.Passwd = config.DatabaseConfig.DB_PASSWORD
+	cfg.Net = config.DatabaseConfig.DB_NET
+	cfg.Addr = config.DatabaseConfig.DB_ADDRESS
+	cfg.DBName = config.DatabaseConfig.DB_NAME
 
 	return cfg
 }
 
 // TODO: should probs move this to a different file too
 func InitDB() (ReviewRepository, error) {
-	db, err := sql.Open("mysql", GetConfig().FormatDSN())
+	db, err := sql.Open("mysql", GetDBConfig().FormatDSN())
 	if err != nil {
 		return ReviewRepository{}, err
 	}
