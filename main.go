@@ -4,27 +4,12 @@ package main
 // TODO: move all handlers into a handlers.go file !
 
 import (
-	"database/sql"
 	"encoding/json"
 	"github.com/arbezy/curve-my-films/config"
 	"log"
 	"net/http"
 	"strconv"
 )
-
-type MovieReview struct {
-	ReviewID  int           `json:"review_id"`
-	MovieName string        `json:"movie_name"`
-	Rating    int           `json:"rating"`
-	leftPtr   sql.NullInt64 `json:"left_ptr"`
-	rightPtr  sql.NullInt64 `json:"right_ptr"`
-}
-
-type RatingTreeNode struct {
-	Review MovieReview     `json:"value"`
-	Left   *RatingTreeNode `json:"left"`
-	Right  *RatingTreeNode `json:"right"`
-}
 
 var rr = ReviewRepository{}
 
@@ -37,7 +22,7 @@ func getReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rev, err := rr.ReadMovieReview(movieName)
+	rev, err := rr.FetchMovieReview(movieName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,12 +31,15 @@ func getReview(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(rev)
 }
 
+// TODO: could find a way to get rid of unnecessary info here, as we only really need movie name from
+// from the movie review right now. Think I would need to make a new struct for this with json -'s (blanks)'?
 func getRatingTree(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	ratingStr := r.Form.Get("rating")
 
 	if len(ratingStr) == 0 {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("No rating supplied with request")
 		return
 	}
 
@@ -67,13 +55,15 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 	var childRev0 = MovieReview{ReviewID: 1, MovieName: "testmovie2", Rating: rating}
 	var childRev1 = MovieReview{ReviewID: 2, MovieName: "testmovie3", Rating: rating}
 
-	var node0 = RatingTreeNode{childRev0, nil, nil}
-	var node1 = RatingTreeNode{childRev1, nil, nil}
-
-	tree := RatingTreeNode{Review: parentRev, Left: &node0, Right: &node1}
+	// contruct the tree from the fetched reviews
+	var node0 = RatingTreeNode{Review: childRev0, Left: nil, Right: nil}
+	var node1 = RatingTreeNode{Review: childRev1, Left: nil, Right: nil}
+	root := RatingTreeNode{Review: parentRev, Left: &node0, Right: &node1}
+	node0.Parent = &root
+	node1.Parent = &root
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tree)
+	json.NewEncoder(w).Encode(root)
 }
 
 // TODO: supplied with an updated tree ?
