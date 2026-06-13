@@ -126,6 +126,7 @@ func buildTree(reviews []*MovieReview) *RatingTreeNode {
 }
 
 // TODO: supplied with an updated tree ?
+// NOTE: actually I'd rather do just an add rating function...
 func updateRatingTree(w http.ResponseWriter, r *http.Request) {
 	// TODO: parse new tree from request body
 	// TODO: perform db update
@@ -134,11 +135,34 @@ func updateRatingTree(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("success") // NOTE: if new tree not created in the front end then return new tree here
 }
 
+// TODO: add rating (to tree)
+func addReview(w http.ResponseWriter, r *http.Request) {
+	// parse review from request
+	// find relevent rating tree
+	// add to tree -> but how? since we don't know where it should go
+	// also pass in request , where the new review should go in tree. This could be done with a list of lefts and rights?
+	// would then need to rebalance tree I think
+	// then need to write this back to the db, the easiest way to do this would be to delete the entire tree and replace with new tree
+	// there is probably a more clever way to do this but I would need to calculate the actions to take on the existing tree to update
+	// to match new rating structure.
+}
+
 func handleRequests() {
 	http.Handle("/reviews", http.HandlerFunc(getAllReviews))
-	http.Handle("/review", http.HandlerFunc(getReview))
+	http.Handle("/review", http.HandlerFunc(handleReview))
 	http.Handle("/tree", http.HandlerFunc(getRatingTree))
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func handleReview(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		getReview(w, r)
+	case http.MethodPost:
+		addReview(w, r)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 func main() {
