@@ -6,3 +6,9 @@ The goal is to create a reviewing api, or app that will prompt a user to rank fi
 Trying to approach this by starting out doing the minimum and then building off of it.
 
 Using NO FRAMEWORK as it just seemed more interesting / useful to create an api without one so in the future I can make more informed decisions about what benefits possible framrworks provide.
+
+## Running
+To run use:
+`go run .`
+in root dir
+
