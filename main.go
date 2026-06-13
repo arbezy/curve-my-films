@@ -5,13 +5,25 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/arbezy/curve-my-films/config"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/arbezy/curve-my-films/config"
 )
 
 var rr = ReviewRepository{}
+
+func getAllReviews(w http.ResponseWriter, r *http.Request) {
+	revs, err := rr.FetchAllReviews()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error getting all reviews: %v", err), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(revs)
+}
 
 func getReview(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -22,9 +34,13 @@ func getReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("Looking for movie: %s \n", movieName)
+
 	rev, err := rr.FetchMovieReview(movieName)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("Error %v", err)
+		http.Error(w, fmt.Sprintf("Error fetching review: %v", err), http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -48,6 +64,16 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode("Cannot convert rating to integer")
 		return
+	}
+
+	reviews, err := rr.FetchReviewsByRating(rating)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error during FetchReviewsByRating: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	for i := 0; i < len(reviews); i++ {
+		fmt.Println(reviews[i].MovieName)
 	}
 
 	// TODO: replace with db fetch -> this has been implemented now as FetchReviewsByRating
@@ -76,12 +102,15 @@ func updateRatingTree(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRequests() {
+	http.Handle("/reviews", http.HandlerFunc(getAllReviews))
 	http.Handle("/review", http.HandlerFunc(getReview))
 	http.Handle("/tree", http.HandlerFunc(getRatingTree))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func main() {
+	fmt.Println("Running CurveMyFilms")
+
 	err := config.Init()
 	if err != nil {
 		log.Fatal(err)
