@@ -125,16 +125,6 @@ func buildTree(reviews []*MovieReview) *RatingTreeNode {
 	return root
 }
 
-// TODO: supplied with an updated tree ?
-// NOTE: actually I'd rather do just an add rating function...
-func updateRatingTree(w http.ResponseWriter, r *http.Request) {
-	// TODO: parse new tree from request body
-	// TODO: perform db update
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode("success") // NOTE: if new tree not created in the front end then return new tree here
-}
-
 // TODO: add rating (to tree)
 func addReview(w http.ResponseWriter, r *http.Request) {
 	// parse review from request
