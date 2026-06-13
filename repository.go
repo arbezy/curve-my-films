@@ -33,12 +33,33 @@ func InitDB() (ReviewRepository, error) {
 	return ReviewRepository{db}, nil
 }
 
+func (rr *ReviewRepository) FetchAllReviews() ([]*MovieReview, error) {
+	query := fmt.Sprintf("SELECT * FROM reviews;")
+	results, err := rr.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	reviews := []*MovieReview{}
+	for results.Next() {
+		rev := &MovieReview{}
+		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
+		if err != nil {
+			return nil, err
+		}
+		reviews = append(reviews, rev)
+	}
+	return reviews, nil
+}
+
 func (rr *ReviewRepository) FetchMovieReview(movieName string) (*MovieReview, error) {
 	query := fmt.Sprintf("SELECT * FROM reviews WHERE movie_name='%s';", movieName)
 	results, err := rr.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
+	defer results.Close()
 
 	rev := &MovieReview{}
 	if results.Next() {
@@ -62,15 +83,13 @@ func (rr *ReviewRepository) FetchReviewsByRating(rating int) ([]*MovieReview, er
 	}
 
 	reviews := []*MovieReview{}
-	if results.Next() {
+	for results.Next() {
 		rev := &MovieReview{}
 		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
 		if err != nil {
 			return nil, err
 		}
 		reviews = append(reviews, rev)
-	} else {
-		return nil, errors.New("no reviews found for that rating")
 	}
 
 	return reviews, nil
