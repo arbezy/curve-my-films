@@ -12,6 +12,7 @@ type ReviewRepository struct {
 	db *sql.DB
 }
 
+// TODO: should probs move this to a different file too (db.go ?)
 func GetDBConfig() *mysql.Config {
 	var cfg = mysql.NewConfig()
 	cfg.User = config.DatabaseConfig.DB_USERNAME
@@ -32,7 +33,7 @@ func InitDB() (ReviewRepository, error) {
 	return ReviewRepository{db}, nil
 }
 
-func (rr *ReviewRepository) ReadMovieReview(movieName string) (*MovieReview, error) {
+func (rr *ReviewRepository) FetchMovieReview(movieName string) (*MovieReview, error) {
 	query := fmt.Sprintf("SELECT * FROM reviews WHERE movie_name='%s';", movieName)
 	results, err := rr.db.Query(query)
 	if err != nil {
@@ -41,7 +42,7 @@ func (rr *ReviewRepository) ReadMovieReview(movieName string) (*MovieReview, err
 
 	rev := &MovieReview{}
 	if results.Next() {
-		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.leftPtr, &rev.rightPtr)
+		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
 		if err != nil {
 			return nil, err
 		}
@@ -50,4 +51,27 @@ func (rr *ReviewRepository) ReadMovieReview(movieName string) (*MovieReview, err
 	}
 
 	return rev, nil
+}
+
+// Reads all the reviews by rating so they can be contructed into a big TREE !
+func (rr *ReviewRepository) FetchReviewsByRating(rating int) ([]*MovieReview, error) {
+	query := fmt.Sprintf("SELECT * FROM reviews WHERE rating=%d;", rating)
+	results, err := rr.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	reviews := []*MovieReview{}
+	if results.Next() {
+		rev := &MovieReview{}
+		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
+		if err != nil {
+			return nil, err
+		}
+		reviews = append(reviews, rev)
+	} else {
+		return nil, errors.New("no reviews found for that rating")
+	}
+
+	return reviews, nil
 }

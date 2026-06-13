@@ -50,7 +50,7 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: replace with db fetch
+	// TODO: replace with db fetch -> this has been implemented now as FetchReviewsByRating
 	var parentRev = MovieReview{ReviewID: 0, MovieName: "testmovie1", Rating: rating}
 	var childRev0 = MovieReview{ReviewID: 1, MovieName: "testmovie2", Rating: rating}
 	var childRev1 = MovieReview{ReviewID: 2, MovieName: "testmovie3", Rating: rating}
