@@ -72,24 +72,57 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i := 0; i < len(reviews); i++ {
-		fmt.Println(reviews[i].MovieName)
+	if len(reviews) == 0 {
+		http.Error(w, fmt.Sprintf("Length of fetched reviews is zero"), http.StatusInternalServerError)
+		return
 	}
 
-	// TODO: replace with db fetch -> this has been implemented now as FetchReviewsByRating
-	var parentRev = MovieReview{ReviewID: 0, MovieName: "testmovie1", Rating: rating}
-	var childRev0 = MovieReview{ReviewID: 1, MovieName: "testmovie2", Rating: rating}
-	var childRev1 = MovieReview{ReviewID: 2, MovieName: "testmovie3", Rating: rating}
+	reviewTreeRoot := buildTree(reviews)
+	if reviewTreeRoot == nil {
+		http.Error(w, fmt.Sprint("root node of tree is nil"), http.StatusInternalServerError)
+		return
+	}
 
-	// contruct the tree from the fetched reviews
-	var node0 = RatingTreeNode{Review: childRev0, Left: nil, Right: nil}
-	var node1 = RatingTreeNode{Review: childRev1, Left: nil, Right: nil}
-	root := RatingTreeNode{Review: parentRev, Left: &node0, Right: &node1}
-	node0.Parent = &root
-	node1.Parent = &root
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(ToResponse(reviewTreeRoot)); err != nil {
+		fmt.Println("JSON encode error:", err)
+	}
+}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(root)
+func buildTree(reviews []*MovieReview) *RatingTreeNode {
+	fmt.Println("building tree..")
+	if len(reviews) == 0 {
+		return nil
+	}
+
+	// create a node for each review, mapped by ReviewID
+	nodeMap := make(map[int]*RatingTreeNode)
+	for _, review := range reviews {
+		nodeMap[review.ReviewID] = &RatingTreeNode{
+			Review: *review,
+		}
+	}
+
+	// wire up the pointers
+	var root *RatingTreeNode
+	for _, review := range reviews {
+		node := nodeMap[review.ReviewID]
+
+		if review.LeftPtr.Valid {
+			node.Left = nodeMap[int(review.LeftPtr.Int64)]
+		}
+		if review.RightPtr.Valid {
+			node.Right = nodeMap[int(review.RightPtr.Int64)]
+		}
+		if review.ParentPtr.Valid {
+			node.Parent = nodeMap[int(review.ParentPtr.Int64)]
+		} else {
+			// no parent means this is the root
+			root = node
+		}
+	}
+
+	return root
 }
 
 // TODO: supplied with an updated tree ?

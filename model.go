@@ -17,3 +17,20 @@ type RatingTreeNode struct {
 	Right  *RatingTreeNode `json:"right"`
 	Parent *RatingTreeNode `json:"-"`
 }
+
+type RatingTreeNodeResponse struct {
+	Review MovieReview             `json:"value"`
+	Left   *RatingTreeNodeResponse `json:"left"`
+	Right  *RatingTreeNodeResponse `json:"right"`
+}
+
+func ToResponse(node *RatingTreeNode) *RatingTreeNodeResponse {
+	if node == nil {
+		return nil
+	}
+	return &RatingTreeNodeResponse{
+		Review: node.Review,
+		Left:   ToResponse(node.Left),
+		Right:  ToResponse(node.Right),
+	}
+}
