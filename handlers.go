@@ -112,7 +112,7 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(ToResponse(reviewTreeRoot)); err != nil {
+	if err := json.NewEncoder(w).Encode(reviewTreeRoot); err != nil {
 		fmt.Println("JSON encode error:", err)
 	}
 }
