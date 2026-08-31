@@ -5,13 +5,58 @@
   <title>Curve My Films</title>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <style>
-    body { font-family: sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+    :root {
+      --base:     #1e1e2e;
+      --mantle:   #181825;
+      --surface0: #313244;
+      --surface1: #45475a;
+      --surface2: #585b70;
+      --text:     #cdd6f4;
+      --subtext0: #a6adc8;
+      --mauve:    #cba6f7;
+      --pink:     #f5c2e7;
+      --blue:     #89b4fa;
+    }
+
+    body {
+      font-family: sans-serif;
+      max-width: 40rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: var(--base);
+      color: var(--text);
+    }
+
+    h1 .word-1 { color: var(--mauve); }
+    h1 .word-2 { color: var(--pink); }
+    h1 .word-3 { color: var(--blue); }
+
     ul { padding-left: 1.2rem; }
-    button { padding: 0.4rem 0.8rem; }
+
+    li {
+      background: var(--surface0);
+      border: 1px solid var(--surface1);
+      border-radius: 0.4rem;
+      padding: 0.5rem 0.8rem;
+      margin-bottom: 0.4rem;
+      list-style: none;
+    }
+
+    button {
+      padding: 0.4rem 0.8rem;
+      background: var(--mauve);
+      color: var(--mantle);
+      border: none;
+      border-radius: 0.4rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--subtext0); }
   </style>
 </head>
 <body>
-  <h1>Curve My Films</h1>
+  <h1><span class="word-1">Curve</span> <span class="word-2">My</span> <span class="word-3">Films</span></h1>
 
   <button hx-get="/ui/reviews" hx-target="#review-list" hx-swap="innerHTML">
     Load Reviews
