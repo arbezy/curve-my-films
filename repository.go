@@ -126,6 +126,23 @@ func (rr *ReviewRepository) UpdateReviewPointers(reviewID int, left, right, pare
 	return err
 }
 
+// updates a review's movie_name. Returns ErrReviewNotFound if no row matches reviewID.
+func (rr *ReviewRepository) UpdateReviewName(reviewID int, movieName string) error {
+	query := "UPDATE reviews SET movie_name = ? WHERE review_id = ?;"
+	result, err := rr.db.Exec(query, movieName, reviewID)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrReviewNotFound
+	}
+	return nil
+}
+
 // deletes a single review row.
 func (rr *ReviewRepository) DeleteReview(reviewID int) error {
 	query := "DELETE FROM reviews WHERE review_id = ?;"

@@ -28,6 +28,8 @@ func handleReview(w http.ResponseWriter, r *http.Request) {
 		getReview(w, r)
 	case http.MethodPost:
 		addReview(w, r)
+	case http.MethodPut:
+		updateReview(w, r)
 	case http.MethodDelete:
 		deleteReview(w, r)
 	default:
@@ -138,6 +140,39 @@ func deleteReview(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 	default:
 		http.Error(w, fmt.Sprintf("error deleting review: %v", err), http.StatusInternalServerError)
+	}
+}
+
+type UpdateReviewRequest struct {
+	ReviewID  int    `json:"review_id"`
+	MovieName string `json:"movie_name"`
+}
+
+func updateReview(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
+	var req UpdateReviewRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	if req.ReviewID == 0 {
+		http.Error(w, "review_id is required", http.StatusBadRequest)
+		return
+	}
+	if len(req.MovieName) == 0 {
+		http.Error(w, "movie_name is required", http.StatusBadRequest)
+		return
+	}
+
+	switch err := rr.UpdateReviewName(req.ReviewID, req.MovieName); {
+	case err == nil:
+		w.WriteHeader(http.StatusNoContent)
+	case errors.Is(err, ErrReviewNotFound):
+		http.Error(w, err.Error(), http.StatusNotFound)
+	default:
+		http.Error(w, fmt.Sprintf("error updating review: %v", err), http.StatusInternalServerError)
 	}
 }
 
