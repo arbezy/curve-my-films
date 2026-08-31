@@ -109,7 +109,7 @@ func leftmost(node *RatingTreeNode) *RatingTreeNode {
 }
 
 // replaceChild rewires parent's Left/Right pointer (whichever currently points
-// at oldChild) to point at newChild instead. No-op if parent is nil.
+// at oldChild) to point at newChild instead. No operation if parent is nil.
 func replaceChild(parent, oldChild, newChild *RatingTreeNode) {
 	if parent == nil {
 		return
@@ -141,24 +141,28 @@ func DeleteNode(target *RatingTreeNode) (changed []*RatingTreeNode) {
 	var replacement *RatingTreeNode
 
 	switch {
-	case target.Left == nil && target.Right == nil:
+	case target.Left == nil && target.Right == nil: // node has no children
 		replacement = nil
 
-	case target.Left == nil || target.Right == nil:
+	case target.Left == nil || target.Right == nil: // node has one child
 		if target.Left != nil {
 			replacement = target.Left
 		} else {
 			replacement = target.Right
 		}
 
-	default:
+	default: // node has 2 children
+		// inorder successor:
 		successor := leftmost(target.Right)
 		successorParent := successor.Parent
 		successorChild := successor.Right // successor has no Left child by definition
 
+		// if successor is target.Right, then no left descent needed!
+		// so we can skip this "unhooking" stage
 		if successorParent != target {
 			replaceChild(successorParent, successor, successorChild)
 			changed = append(changed, successorParent)
+			// if successor (right) child exists, then set parent of child so that is isn't orphaned
 			if successorChild != nil {
 				successorChild.Parent = successorParent
 				changed = append(changed, successorChild)
@@ -175,10 +179,12 @@ func DeleteNode(target *RatingTreeNode) (changed []*RatingTreeNode) {
 		replacement = successor
 	}
 
+	// if there is a replacement, then point its parent val to the targets old parent
 	if replacement != nil {
 		replacement.Parent = parent
 		changed = append(changed, replacement)
 	}
+	// points parent to replacement node (instead of target)
 	replaceChild(parent, target, replacement)
 	if parent != nil {
 		changed = append(changed, parent)
