@@ -3,9 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 func BuildTree(reviews []*MovieReview) *RatingTreeNode {
+	log.Println("Building Tree...")
 	if len(reviews) == 0 {
 		return nil
 	}
@@ -37,7 +39,7 @@ func BuildTree(reviews []*MovieReview) *RatingTreeNode {
 		}
 	}
 
-	fmt.Println("newly built tree:")
+	log.Println("current tree:")
 	PrintTree(root)
 
 	return root

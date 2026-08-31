@@ -34,3 +34,9 @@ func ToResponse(node *RatingTreeNode) *RatingTreeNodeResponse {
 		Right:  ToResponse(node.Right),
 	}
 }
+
+type AddReviewRequest struct {
+	MovieName string   `json:"movie_name"`
+	Rating    int      `json:"rating"`
+	Path      []string `json:"path"` // "left"/"right" directions from the root to the new review's slot
+}

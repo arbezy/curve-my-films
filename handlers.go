@@ -19,6 +19,8 @@ func HandleRequests() {
 }
 
 func handleReview(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
 	switch r.Method {
 	case http.MethodGet:
 		getReview(w, r)
@@ -32,6 +34,8 @@ func handleReview(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllReviews(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
 	revs, err := rr.FetchAllReviews()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error getting all reviews: %v", err), http.StatusInternalServerError)
@@ -42,6 +46,8 @@ func getAllReviews(w http.ResponseWriter, r *http.Request) {
 }
 
 func getReview(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
 	r.ParseForm()
 	movieName := r.Form.Get("moviename")
 
@@ -66,6 +72,8 @@ func getReview(w http.ResponseWriter, r *http.Request) {
 // TODO: could find a way to get rid of unnecessary info here, as we only really need movie name from
 // from the movie review right now. Think I would need to make a new struct for this with json -'s (blanks)'?
 func getRatingTree(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
 	r.ParseForm()
 	ratingStr := r.Form.Get("rating")
 
@@ -106,6 +114,8 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteReview(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
 	r.ParseForm()
 	idStr := r.Form.Get("id")
 	if len(idStr) == 0 {
@@ -145,6 +155,9 @@ func deleteReview(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	log.Println("tree after deletion:")
+	PrintTree(root)
+
 	if err := rr.DeleteReview(id); err != nil {
 		http.Error(w, fmt.Sprintf("error deleting review: %v", err), http.StatusInternalServerError)
 		return
@@ -153,13 +166,9 @@ func deleteReview(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-type AddReviewRequest struct {
-	MovieName string   `json:"movie_name"`
-	Rating    int      `json:"rating"`
-	Path      []string `json:"path"` // "left"/"right" directions from the root to the new review's slot
-}
-
 func addReview(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
 	var req AddReviewRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, fmt.Sprintf("invalid request body: %v", err), http.StatusBadRequest)
