@@ -1,0 +1,9 @@
+{{if not .}}
+  <p>No reviews yet.</p>
+{{else}}
+  <ul>
+    {{range .}}
+      <li>{{.MovieName}} — {{.Rating}}/10</li>
+    {{end}}
+  </ul>
+{{end}}
