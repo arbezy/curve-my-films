@@ -87,13 +87,13 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(reviews) == 0 {
-		http.Error(w, fmt.Sprintf("Length of fetched reviews is zero"), http.StatusInternalServerError)
+		http.Error(w, "Length of fetched reviews is zero", http.StatusInternalServerError)
 		return
 	}
 
-	reviewTreeRoot := buildTree(reviews)
+	reviewTreeRoot := BuildTree(reviews)
 	if reviewTreeRoot == nil {
-		http.Error(w, fmt.Sprint("root node of tree is nil"), http.StatusInternalServerError)
+		http.Error(w, "root node of tree is nil", http.StatusInternalServerError)
 		return
 	}
 
@@ -101,43 +101,6 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(ToResponse(reviewTreeRoot)); err != nil {
 		fmt.Println("JSON encode error:", err)
 	}
-}
-
-// TODO: move into tree.go
-func buildTree(reviews []*MovieReview) *RatingTreeNode {
-	fmt.Println("building tree..")
-	if len(reviews) == 0 {
-		return nil
-	}
-
-	// create a node for each review, mapped by ReviewID
-	nodeMap := make(map[int]*RatingTreeNode)
-	for _, review := range reviews {
-		nodeMap[review.ReviewID] = &RatingTreeNode{
-			Review: *review,
-		}
-	}
-
-	// wire up the pointers
-	var root *RatingTreeNode
-	for _, review := range reviews {
-		node := nodeMap[review.ReviewID]
-
-		if review.LeftPtr.Valid {
-			node.Left = nodeMap[int(review.LeftPtr.Int64)]
-		}
-		if review.RightPtr.Valid {
-			node.Right = nodeMap[int(review.RightPtr.Int64)]
-		}
-		if review.ParentPtr.Valid {
-			node.Parent = nodeMap[int(review.ParentPtr.Int64)]
-		} else {
-			// no parent means this is the root
-			root = node
-		}
-	}
-
-	return root
 }
 
 type AddReviewRequest struct {
@@ -179,7 +142,7 @@ func addReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	root := buildTree(existing)
+	root := BuildTree(existing)
 	if root == nil {
 		http.Error(w, "root node of tree is nil", http.StatusInternalServerError)
 		return
