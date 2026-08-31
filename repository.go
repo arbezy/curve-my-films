@@ -179,6 +179,7 @@ func (rr *ReviewRepository) FetchReviewsByRating(rating int) ([]*MovieReview, er
 	if err != nil {
 		return nil, err
 	}
+	defer results.Close()
 
 	reviews := []*MovieReview{}
 	for results.Next() {
