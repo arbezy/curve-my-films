@@ -34,7 +34,7 @@ func InitDB() (ReviewRepository, error) {
 }
 
 func (rr *ReviewRepository) FetchAllReviews() ([]*MovieReview, error) {
-	query := fmt.Sprintf("SELECT * FROM reviews;")
+	query := "SELECT * FROM reviews;"
 	results, err := rr.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -54,8 +54,8 @@ func (rr *ReviewRepository) FetchAllReviews() ([]*MovieReview, error) {
 }
 
 func (rr *ReviewRepository) FetchMovieReview(movieName string) (*MovieReview, error) {
-	query := fmt.Sprintf("SELECT * FROM reviews WHERE movie_name='%s';", movieName)
-	results, err := rr.db.Query(query)
+	query := "SELECT * FROM reviews WHERE movie_name=?;"
+	results, err := rr.db.Query(query, movieName)
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +101,8 @@ func (rr *ReviewRepository) UpdateReviewChildPtr(parentID int64, side string, ch
 
 // Reads all the reviews by rating so they can be contructed into a big TREE !
 func (rr *ReviewRepository) FetchReviewsByRating(rating int) ([]*MovieReview, error) {
-	query := fmt.Sprintf("SELECT * FROM reviews WHERE rating=%d;", rating)
-	results, err := rr.db.Query(query)
+	query := "SELECT * FROM reviews WHERE rating=?;"
+	results, err := rr.db.Query(query, rating)
 	if err != nil {
 		return nil, err
 	}
