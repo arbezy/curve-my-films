@@ -1,7 +1,6 @@
 package main
 
 // TODO: put in cmd dir
-// TODO: move all handlers into a handlers.go file !
 
 import (
 	"fmt"

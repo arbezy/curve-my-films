@@ -24,6 +24,8 @@ func handleReview(w http.ResponseWriter, r *http.Request) {
 		getReview(w, r)
 	case http.MethodPost:
 		addReview(w, r)
+	case http.MethodDelete:
+		deleteReview(w, r)
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
@@ -101,6 +103,54 @@ func getRatingTree(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(ToResponse(reviewTreeRoot)); err != nil {
 		fmt.Println("JSON encode error:", err)
 	}
+}
+
+func deleteReview(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	idStr := r.Form.Get("id")
+	if len(idStr) == 0 {
+		http.Error(w, "id is required", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "id must be an integer", http.StatusBadRequest)
+		return
+	}
+
+	target, err := rr.FetchReviewByID(id)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error fetching review: %v", err), http.StatusNotFound)
+		return
+	}
+
+	reviews, err := rr.FetchReviewsByRating(target.Rating)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error fetching rating tree: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	root := BuildTree(reviews)
+	node := findNode(root, id)
+	if node == nil {
+		http.Error(w, "review not found in its rating tree", http.StatusInternalServerError)
+		return
+	}
+
+	for _, n := range DeleteNode(node) {
+		if err := rr.UpdateReviewPointers(n.Review.ReviewID, ptrID(n.Left), ptrID(n.Right), ptrID(n.Parent)); err != nil {
+			http.Error(w, fmt.Sprintf("error updating tree pointers: %v", err), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if err := rr.DeleteReview(id); err != nil {
+		http.Error(w, fmt.Sprintf("error deleting review: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 type AddReviewRequest struct {
