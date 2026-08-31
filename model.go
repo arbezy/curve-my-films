@@ -40,3 +40,8 @@ type AddReviewRequest struct {
 	Rating    int      `json:"rating"`
 	Path      []string `json:"path"` // "left"/"right" directions from the root to the new review's slot
 }
+
+type UpdateReviewRequest struct {
+	ReviewID  int    `json:"review_id"`
+	MovieName string `json:"movie_name"`
+}

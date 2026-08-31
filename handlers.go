@@ -143,11 +143,6 @@ func deleteReview(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type UpdateReviewRequest struct {
-	ReviewID  int    `json:"review_id"`
-	MovieName string `json:"movie_name"`
-}
-
 func updateReview(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s", r.Method, r.URL.Path)
 
