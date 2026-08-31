@@ -1,0 +1,25 @@
+{{if not .HasData}}
+<p>No reviews yet.</p>
+{{else}}
+<div class="chart" role="img" aria-label="Number of films rated per score, 1 to 10">
+  <div class="chart-bars">
+    {{range .Bars}}
+    <button
+      type="button"
+      class="chart-col"
+      title="Rating {{.Rating}}: {{.Count}} film{{if ne .Count 1}}s{{end}}"
+      aria-label="Rating {{.Rating}}: {{.Count}} film{{if ne .Count 1}}s{{end}}"
+      hx-get="/ui/rating-ranking?rating={{.Rating}}"
+      hx-target="#rating-ranking"
+      hx-swap="innerHTML"
+      {{if eq .Count 0}}disabled{{end}}
+    >
+      <span class="chart-count">{{.Count}}</span>
+      <span class="chart-bar" style="height: {{.HeightPct}}%"></span>
+      <span class="chart-axis-label">{{.Rating}}</span>
+    </button>
+    {{end}}
+  </div>
+</div>
+<div id="rating-ranking"></div>
+{{end}}

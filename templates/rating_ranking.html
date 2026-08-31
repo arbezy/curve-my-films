@@ -1,0 +1,10 @@
+<h3>Rating {{.Rating}} — ranked</h3>
+{{if not .Reviews}}
+<p>No reviews yet.</p>
+{{else}}
+<ol class="ranking">
+  {{range .Reviews}}
+  <li>{{.MovieName}}</li>
+  {{end}}
+</ol>
+{{end}}

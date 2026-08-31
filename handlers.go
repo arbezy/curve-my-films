@@ -16,6 +16,8 @@ func HandleRequests() {
 	http.Handle("/ui/reviews", http.HandlerFunc(serveReviewsFragment))
 	http.Handle("/ui/add-review", http.HandlerFunc(serveAddReviewForm))
 	http.Handle("/ui/add-review/compare", http.HandlerFunc(compareReview))
+	http.Handle("/ui/rating-breakdown", http.HandlerFunc(serveRatingBreakdown))
+	http.Handle("/ui/rating-ranking", http.HandlerFunc(serveRatingRanking))
 	http.Handle("/reviews", http.HandlerFunc(getAllReviews))
 	http.Handle("/review", http.HandlerFunc(handleReview))
 	http.Handle("/tree", http.HandlerFunc(getRatingTree))

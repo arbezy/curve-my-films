@@ -150,6 +150,28 @@ func (rr *ReviewRepository) DeleteReview(reviewID int) error {
 	return err
 }
 
+// counts reviews per rating, for the rating breakdown chart. Ratings with no
+// reviews are simply absent from the returned map.
+func (rr *ReviewRepository) CountReviewsByRating() (map[int]int, error) {
+	query := "SELECT rating, COUNT(*) FROM reviews GROUP BY rating;"
+	results, err := rr.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	counts := make(map[int]int)
+	for results.Next() {
+		var rating, count int
+		if err := results.Scan(&rating, &count); err != nil {
+			return nil, err
+		}
+		counts[rating] = count
+	}
+
+	return counts, nil
+}
+
 // reads all the reviews by rating so they can be contructed into a big TREE !
 func (rr *ReviewRepository) FetchReviewsByRating(rating int) ([]*MovieReview, error) {
 	query := "SELECT * FROM reviews WHERE rating=?;"

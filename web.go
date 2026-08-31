@@ -130,3 +130,88 @@ func renderAddReviewResult(w http.ResponseWriter, movieName string, rating int, 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+const (
+	minRating = 1
+	maxRating = 10
+)
+
+// ratingBarView is one bar of the rating breakdown chart.
+type ratingBarView struct {
+	Rating    int
+	Count     int
+	HeightPct int // 0-100, relative to the highest count among all ratings
+}
+
+// ratingBreakdownView is the full chart: one bar per rating 1-10, plus whether
+// there's any data at all (so the template can show an empty state instead of
+// ten flat zero-height bars).
+type ratingBreakdownView struct {
+	Bars    []ratingBarView
+	HasData bool
+}
+
+// serveRatingBreakdown renders the bar chart of how many films are rated at each
+// score from 1 to 10.
+func serveRatingBreakdown(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
+	counts, err := rr.CountReviewsByRating()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	max := 0
+	for _, c := range counts {
+		if c > max {
+			max = c
+		}
+	}
+
+	bars := make([]ratingBarView, 0, maxRating-minRating+1)
+	for rating := minRating; rating <= maxRating; rating++ {
+		count := counts[rating]
+		heightPct := 0
+		if max > 0 {
+			heightPct = count * 100 / max
+		}
+		bars = append(bars, ratingBarView{Rating: rating, Count: count, HeightPct: heightPct})
+	}
+
+	view := ratingBreakdownView{Bars: bars, HasData: max > 0}
+
+	if err := templates.ExecuteTemplate(w, "rating_breakdown.html", view); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// ratingRankingView is the ranked (best-to-worst) list of films at one rating.
+type ratingRankingView struct {
+	Rating  int
+	Reviews []MovieReview
+}
+
+// serveRatingRanking renders the full ranking of films at one rating, highest to
+// lowest, for when a bar in the breakdown chart is clicked.
+func serveRatingRanking(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
+	rating, err := strconv.Atoi(r.URL.Query().Get("rating"))
+	if err != nil {
+		http.Error(w, "rating must be an integer", http.StatusBadRequest)
+		return
+	}
+
+	reviews, err := rr.FetchReviewsByRating(rating)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	view := ratingRankingView{Rating: rating, Reviews: InOrderDescending(BuildTree(reviews))}
+
+	if err := templates.ExecuteTemplate(w, "rating_ranking.html", view); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}

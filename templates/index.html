@@ -83,6 +83,72 @@
     }
     ul.tree { padding-left: 0; border-left: none; }
     ul.tree li { margin: 0.3rem 0; }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 9rem;
+      padding-top: 1.2rem;
+      border-bottom: 1px solid var(--surface2);
+    }
+
+    .chart-col {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+      background: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      font-weight: normal;
+      color: var(--text);
+    }
+    .chart-col:hover:not(:disabled),
+    .chart-col:focus-visible {
+      background: none;
+    }
+    .chart-col:disabled { cursor: default; opacity: 0.4; }
+
+    .chart-count {
+      font-size: 0.75rem;
+      color: var(--subtext0);
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 0.2rem;
+    }
+
+    .chart-bar {
+      width: 60%;
+      max-width: 1.5rem;
+      min-height: 2px;
+      background: var(--mauve);
+      border-radius: 4px 4px 0 0;
+      transition: filter 0.1s ease;
+    }
+    .chart-col:hover:not(:disabled) .chart-bar,
+    .chart-col:focus-visible .chart-bar {
+      filter: brightness(1.2);
+    }
+
+    .chart-axis-label {
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--subtext0);
+    }
+
+    ol.ranking {
+      padding-left: 1.4rem;
+    }
+    ol.ranking li {
+      background: var(--surface0);
+      border: 1px solid var(--surface1);
+      border-radius: 0.4rem;
+      padding: 0.5rem 0.8rem;
+      margin-bottom: 0.4rem;
+    }
   </style>
 </head>
 <body>
@@ -101,5 +167,13 @@
   </button>
 
   <div id="add-review-panel"></div>
+
+  <hr>
+
+  <button hx-get="/ui/rating-breakdown" hx-target="#rating-breakdown-panel" hx-swap="innerHTML">
+    Show Rating Breakdown
+  </button>
+
+  <div id="rating-breakdown-panel"></div>
 </body>
 </html>
