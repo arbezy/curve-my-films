@@ -1,0 +1,6 @@
+{{if .Err}}
+<div class="banner banner-error">Failed to add review: {{.Err}}</div>
+{{else}}
+<div class="banner banner-success">Added "{{.MovieName}}" to the rating {{.Rating}} tree.</div>
+{{template "tree" .Root}}
+{{end}}

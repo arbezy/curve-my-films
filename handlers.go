@@ -14,6 +14,8 @@ var rr = ReviewRepository{}
 func HandleRequests() {
 	http.Handle("/", http.HandlerFunc(serveIndex))
 	http.Handle("/ui/reviews", http.HandlerFunc(serveReviewsFragment))
+	http.Handle("/ui/add-review", http.HandlerFunc(serveAddReviewForm))
+	http.Handle("/ui/add-review/compare", http.HandlerFunc(compareReview))
 	http.Handle("/reviews", http.HandlerFunc(getAllReviews))
 	http.Handle("/review", http.HandlerFunc(handleReview))
 	http.Handle("/tree", http.HandlerFunc(getRatingTree))

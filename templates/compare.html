@@ -1,0 +1,10 @@
+<form hx-post="/ui/add-review/compare" hx-target="#add-review-panel" hx-swap="innerHTML">
+  <input type="hidden" name="movie_name" value="{{.MovieName}}">
+  <input type="hidden" name="rating" value="{{.Rating}}">
+  {{range .Path}}<input type="hidden" name="path" value="{{.}}">{{end}}
+
+  <p>Is <strong>{{.MovieName}}</strong> better or worse than <strong>{{.Current.Review.MovieName}}</strong>?</p>
+
+  <button type="submit" name="path" value="left">Worse</button>
+  <button type="submit" name="path" value="right">Better</button>
+</form>

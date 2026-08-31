@@ -1,0 +1,19 @@
+{{define "treeNode"}}
+<li>
+  {{.Review.MovieName}}
+  {{if or .Left .Right}}
+  <ul>
+    {{if .Left}}{{template "treeNode" .Left}}{{end}}
+    {{if .Right}}{{template "treeNode" .Right}}{{end}}
+  </ul>
+  {{end}}
+</li>
+{{end}}
+
+{{define "tree"}}
+{{if .}}
+<ul class="tree">{{template "treeNode" .}}</ul>
+{{else}}
+<p>No reviews yet.</p>
+{{end}}
+{{end}}

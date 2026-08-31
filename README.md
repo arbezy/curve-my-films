@@ -1,7 +1,7 @@
 # Curve My Films
-Work in progress movie review api.
+Work in progress movie review app.
 
-The goal is to create a reviewing api, or app that will prompt a user to rank films within a rating, so you can get a pure rating. I.e. if rating two 8/10 films user would be prompted to rank them and so get a "high" 8 and a "low" 8 rating for those two films.
+The goal is to create a reviewing app that will prompt a user to rank films within a rating, so you can get a pure rating. I.e. if rating two 8/10 films user would be prompted to rank them and so get a "high" 8 and a "low" 8 rating for those two films.
 
 Trying to approach this by starting out doing the minimum and then building off of it.
 
