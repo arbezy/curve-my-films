@@ -12,3 +12,4 @@ To run use:
 `go run .`
 in root dir
 
+or `air` to run with hot reload!
