@@ -13,6 +13,8 @@ type ReviewRepository struct {
 	db *sql.DB
 }
 
+var ErrReviewNotFound = errors.New("review not found")
+
 // TODO: should probs move this to a different file too (db.go ?)
 func GetDBConfig() *mysql.Config {
 	var cfg = mysql.NewConfig()
@@ -69,7 +71,7 @@ func (rr *ReviewRepository) FetchMovieReview(movieName string) (*MovieReview, er
 			return nil, err
 		}
 	} else {
-		return nil, errors.New("review not found")
+		return nil, ErrReviewNotFound
 	}
 
 	return rev, nil
@@ -83,7 +85,7 @@ func (rr *ReviewRepository) FetchReviewByID(reviewID int) (*MovieReview, error) 
 	rev := &MovieReview{}
 	err := row.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
 	if err == sql.ErrNoRows {
-		return nil, errors.New("review not found")
+		return nil, ErrReviewNotFound
 	}
 	if err != nil {
 		return nil, err

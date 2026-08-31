@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 )
@@ -121,15 +120,6 @@ func replaceChild(parent, oldChild, newChild *RatingTreeNode) {
 	} else if parent.Right == oldChild {
 		parent.Right = newChild
 	}
-}
-
-// ptrID converts a node into the sql.NullInt64 form its review_id takes in a
-// left_ptr/right_ptr/parent_ptr column (NULL for a nil node).
-func ptrID(node *RatingTreeNode) sql.NullInt64 {
-	if node == nil {
-		return sql.NullInt64{}
-	}
-	return sql.NullInt64{Int64: int64(node.Review.ReviewID), Valid: true}
 }
 
 // DeleteNode removes target from the tree it belongs to, rewiring Left/Right/Parent
