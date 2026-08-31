@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/arbezy/curve-my-films/config"
 	"github.com/go-sql-driver/mysql"
 )
@@ -74,7 +75,7 @@ func (rr *ReviewRepository) FetchMovieReview(movieName string) (*MovieReview, er
 	return rev, nil
 }
 
-// Inserts a new review row and returns its generated review_id.
+// inserts a new review row and returns its generated review_id.
 func (rr *ReviewRepository) InsertReview(review *MovieReview) (int64, error) {
 	query := "INSERT INTO reviews (movie_name, rating, left_ptr, right_ptr, parent_ptr) VALUES (?, ?, ?, ?, ?);"
 	result, err := rr.db.Exec(query, review.MovieName, review.Rating, review.LeftPtr, review.RightPtr, review.ParentPtr)
@@ -84,7 +85,7 @@ func (rr *ReviewRepository) InsertReview(review *MovieReview) (int64, error) {
 	return result.LastInsertId()
 }
 
-// Links a review to its parent by writing childID into the parent's left_ptr or right_ptr column.
+// links a review to its parent by writing childID into the parent's left_ptr or right_ptr column.
 func (rr *ReviewRepository) UpdateReviewChildPtr(parentID int64, side string, childID int64) error {
 	var query string
 	switch side {
@@ -99,7 +100,7 @@ func (rr *ReviewRepository) UpdateReviewChildPtr(parentID int64, side string, ch
 	return err
 }
 
-// Reads all the reviews by rating so they can be contructed into a big TREE !
+// reads all the reviews by rating so they can be contructed into a big TREE !
 func (rr *ReviewRepository) FetchReviewsByRating(rating int) ([]*MovieReview, error) {
 	query := "SELECT * FROM reviews WHERE rating=?;"
 	results, err := rr.db.Query(query, rating)
