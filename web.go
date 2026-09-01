@@ -356,7 +356,12 @@ func serveRatingBreakdown(w http.ResponseWriter, r *http.Request) {
 // ratingRankingView is the ranked (best-to-worst) list of films at one rating.
 type ratingRankingView struct {
 	Rating  int
-	Reviews []MovieReview
+	Reviews []rankedReview
+}
+
+type rankedReview struct {
+	Rank   int
+	Review MovieReview
 }
 
 // serveRatingRanking renders the full ranking of films at one rating, highest to
@@ -376,7 +381,12 @@ func serveRatingRanking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	view := ratingRankingView{Rating: rating, Reviews: InOrderDescending(BuildTree(reviews))}
+	orderedReviews := InOrderDescending(BuildTree(reviews))
+	rankedReviews := make([]rankedReview, len(orderedReviews))
+	for i, rev := range orderedReviews {
+		rankedReviews[i] = rankedReview{i + 1, rev}
+	}
+	view := ratingRankingView{Rating: rating, Reviews: rankedReviews}
 
 	if err := templates.ExecuteTemplate(w, "rating_ranking.html", view); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
