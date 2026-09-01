@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -36,6 +38,34 @@ func serveReviewsFragment(w http.ResponseWriter, r *http.Request) {
 
 	if err := templates.ExecuteTemplate(w, "reviews.html", revs); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// deleteReviewUI handles a review deletion triggered from the review list.
+// On success it returns 200 OK with an empty body — the delete button's
+// hx-swap="delete" removes the review's <li> from the list regardless of
+// response content.
+func deleteReviewUI(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(r.Form.Get("id"))
+	if err != nil {
+		http.Error(w, "id must be an integer", http.StatusBadRequest)
+		return
+	}
+
+	switch err := DeleteReviewByID(&rr, id); {
+	case err == nil:
+		w.WriteHeader(http.StatusOK)
+	case errors.Is(err, ErrReviewNotFound):
+		http.Error(w, err.Error(), http.StatusNotFound)
+	default:
+		http.Error(w, fmt.Sprintf("error deleting review: %v", err), http.StatusInternalServerError)
 	}
 }
 

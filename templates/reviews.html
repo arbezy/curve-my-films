@@ -3,7 +3,18 @@
 {{else}}
   <ul>
     {{range .}}
-      <li>{{.MovieName}} — {{.Rating}}/10</li>
+      <li class="review-item">
+        <span>{{.MovieName}} — {{.Rating}}/10</span>
+        <button
+          type="button"
+          class="delete-btn"
+          hx-delete="/ui/review?id={{.ReviewID}}"
+          hx-target="closest li"
+          hx-swap="delete"
+          hx-confirm="Delete the review for &quot;{{.MovieName}}&quot;? This cannot be undone."
+          aria-label="Delete review for {{.MovieName}}"
+        >&times;</button>
+      </li>
     {{end}}
   </ul>
 {{end}}
