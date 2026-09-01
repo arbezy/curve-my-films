@@ -69,6 +69,143 @@ func deleteReviewUI(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// editReviewView is the data for the initial "edit a review" form.
+type editReviewView struct {
+	ReviewID  int
+	MovieName string
+	Rating    int
+}
+
+// serveEditReviewForm renders the initial edit form for one review, pre-filled
+// with its current movie name and rating.
+func serveEditReviewForm(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		http.Error(w, "id must be an integer", http.StatusBadRequest)
+		return
+	}
+
+	rev, err := rr.FetchReviewByID(id)
+	switch {
+	case errors.Is(err, ErrReviewNotFound):
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case err != nil:
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	view := editReviewView{ReviewID: rev.ReviewID, MovieName: rev.MovieName, Rating: rev.Rating}
+	if err := templates.ExecuteTemplate(w, "edit_review_form.html", view); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// editCompareView is the data for one step of the edit comparison flow — shown
+// only once a rating change requires the review to be re-ranked into its new
+// rating's tree, mirroring compareView for the add-review flow.
+type editCompareView struct {
+	ReviewID  int
+	MovieName string
+	Rating    int
+	Path      []string
+	Current   *RatingTreeNode
+}
+
+// editReviewResultView is the data for the outcome of an edit: a banner plus
+// the refreshed review list underneath it either way.
+type editReviewResultView struct {
+	MovieName string
+	Rating    int
+	Err       error
+	Reviews   []*MovieReview
+}
+
+// editReviewCompare handles a step of the edit flow: it's posted to both by the
+// initial edit form and by each comparison choice. If the rating hasn't
+// changed, the edit is applied immediately — reordering a rating's tree only
+// matters when a review moves into a different rating. Otherwise it walks the
+// new rating's tree the same way compareReview does, and once the path reaches
+// an empty slot, repositions the review there.
+func editReviewCompare(w http.ResponseWriter, r *http.Request) {
+	log.Printf("%s %s", r.Method, r.URL.Path)
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	reviewID, err := strconv.Atoi(r.Form.Get("review_id"))
+	if err != nil {
+		http.Error(w, "review_id must be an integer", http.StatusBadRequest)
+		return
+	}
+
+	movieName := r.Form.Get("movie_name")
+	if len(movieName) == 0 {
+		http.Error(w, "movie_name is required", http.StatusBadRequest)
+		return
+	}
+
+	rating, err := strconv.Atoi(r.Form.Get("rating"))
+	if err != nil {
+		http.Error(w, "rating must be an integer", http.StatusBadRequest)
+		return
+	}
+
+	path := r.Form["path"]
+
+	current, err := rr.FetchReviewByID(reviewID)
+	if err != nil {
+		renderEditReviewResult(w, movieName, rating, err)
+		return
+	}
+
+	if rating == current.Rating {
+		err := rr.UpdateReviewDetails(reviewID, movieName, rating)
+		renderEditReviewResult(w, movieName, rating, err)
+		return
+	}
+
+	node, err := NodeAtPath(&rr, rating, path)
+	if err != nil {
+		renderEditReviewResult(w, movieName, rating, err)
+		return
+	}
+
+	if node != nil {
+		view := editCompareView{ReviewID: reviewID, MovieName: movieName, Rating: rating, Path: path, Current: node}
+		if err := templates.ExecuteTemplate(w, "edit_compare.html", view); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	err = RepositionReviewAtPath(&rr, reviewID, movieName, rating, path)
+	renderEditReviewResult(w, movieName, rating, err)
+}
+
+// renderEditReviewResult renders the success/failure banner for an edit, along
+// with the review list underneath it so the UI has somewhere to land either way.
+func renderEditReviewResult(w http.ResponseWriter, movieName string, rating int, editErr error) {
+	view := editReviewResultView{MovieName: movieName, Rating: rating, Err: editErr}
+
+	revs, err := rr.FetchAllReviews()
+	if err != nil {
+		if view.Err == nil {
+			view.Err = err
+		}
+	} else {
+		view.Reviews = revs
+	}
+
+	if err := templates.ExecuteTemplate(w, "edit_review_result.html", view); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 // serveAddReviewForm renders the initial "add a review" form.
 func serveAddReviewForm(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s", r.Method, r.URL.Path)

@@ -5,15 +5,25 @@
     {{range .}}
       <li class="review-item">
         <span>{{.MovieName}} — {{.Rating}}/10</span>
-        <button
-          type="button"
-          class="delete-btn"
-          hx-delete="/ui/review?id={{.ReviewID}}"
-          hx-target="closest li"
-          hx-swap="delete"
-          hx-confirm="Delete the review for &quot;{{.MovieName}}&quot;? This cannot be undone."
-          aria-label="Delete review for {{.MovieName}}"
-        >&times;</button>
+        <span class="review-actions">
+          <button
+            type="button"
+            class="edit-btn"
+            hx-get="/ui/edit-review?id={{.ReviewID}}"
+            hx-target="#review-list"
+            hx-swap="innerHTML"
+            aria-label="Edit review for {{.MovieName}}"
+          >&#9998;</button>
+          <button
+            type="button"
+            class="delete-btn"
+            hx-delete="/ui/review?id={{.ReviewID}}"
+            hx-target="closest li"
+            hx-swap="delete"
+            hx-confirm="Delete the review for &quot;{{.MovieName}}&quot;? This cannot be undone."
+            aria-label="Delete review for {{.MovieName}}"
+          >&times;</button>
+        </span>
       </li>
     {{end}}
   </ul>

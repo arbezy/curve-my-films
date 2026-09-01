@@ -1,0 +1,12 @@
+<form hx-post="/ui/edit-review/compare" hx-target="#review-list" hx-swap="innerHTML">
+  <input type="hidden" name="review_id" value="{{.ReviewID}}">
+  <input type="hidden" name="movie_name" value="{{.MovieName}}">
+  <input type="hidden" name="rating" value="{{.Rating}}">
+  {{range .Path}}<input type="hidden" name="path" value="{{.}}">{{end}}
+
+  <p>Moving to rating {{.Rating}} — is <strong>{{.MovieName}}</strong> better or worse than <strong>{{.Current.Review.MovieName}}</strong>?</p>
+
+  <button type="submit" name="path" value="left">Worse</button>
+  <button type="submit" name="path" value="right">Better</button>
+  <button type="button" hx-get="/ui/reviews" hx-target="#review-list" hx-swap="innerHTML">Cancel</button>
+</form>

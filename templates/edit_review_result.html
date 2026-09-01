@@ -1,0 +1,6 @@
+{{if .Err}}
+<div class="banner banner-error">Failed to update review: {{.Err}}</div>
+{{else}}
+<div class="banner banner-success">Updated "{{.MovieName}}".</div>
+{{end}}
+{{template "reviews.html" .Reviews}}

@@ -99,30 +99,93 @@ func InsertReviewAtPath(rr *ReviewRepository, review *MovieReview, path []string
 	return rr.UpdateReviewChildPtr(int64(parent.Review.ReviewID), side, newID)
 }
 
-// DeleteReviewByID removes the review with the given ID from its rating tree,
-// rewiring the tree around it (see DeleteNode), and deletes its row.
-func DeleteReviewByID(rr *ReviewRepository, reviewID int) error {
+// detachFromTree removes reviewID's node from its current rating tree, rewiring
+// Left/Right/Parent pointers on the surrounding nodes to preserve BST structure
+// (see DeleteNode). reviewID's own row is left untouched — its pointers are
+// stale once detached, so callers must either delete the row or overwrite its
+// pointers before it's read again. Returns the review as it stood (with its
+// pre-detach rating) for callers that still need that.
+func detachFromTree(rr *ReviewRepository, reviewID int) (*MovieReview, error) {
 	target, err := rr.FetchReviewByID(reviewID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	reviews, err := rr.FetchReviewsByRating(target.Rating)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	root := BuildTree(reviews)
 	node := findNode(root, reviewID)
 	if node == nil {
-		return fmt.Errorf("review %d not found in its rating tree", reviewID)
+		return nil, fmt.Errorf("review %d not found in its rating tree", reviewID)
 	}
 
 	for _, n := range DeleteNode(node) {
 		if err := rr.UpdateReviewPointers(n.Review.ReviewID, ptrID(n.Left), ptrID(n.Right), ptrID(n.Parent)); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
+	return target, nil
+}
+
+// DeleteReviewByID removes the review with the given ID from its rating tree,
+// rewiring the tree around it, and deletes its row.
+func DeleteReviewByID(rr *ReviewRepository, reviewID int) error {
+	if _, err := detachFromTree(rr, reviewID); err != nil {
+		return err
+	}
 	return rr.DeleteReview(reviewID)
+}
+
+// RepositionReviewAtPath applies an edit that changes reviewID's rating: it
+// detaches the review from its current rating tree, updates its movie name and
+// rating, and re-inserts it into the new rating's tree at the empty slot
+// addressed by path — the same walk used when adding a brand new review, so an
+// edited review gets re-ranked via the same comparison flow rather than landing
+// at an arbitrary position.
+func RepositionReviewAtPath(rr *ReviewRepository, reviewID int, movieName string, rating int, path []string) error {
+	if _, err := detachFromTree(rr, reviewID); err != nil {
+		return err
+	}
+
+	if err := rr.UpdateReviewDetails(reviewID, movieName, rating); err != nil {
+		return err
+	}
+
+	all, err := rr.FetchReviewsByRating(rating)
+	if err != nil {
+		return err
+	}
+	existing := make([]*MovieReview, 0, len(all))
+	for _, rev := range all {
+		if rev.ReviewID != reviewID {
+			existing = append(existing, rev)
+		}
+	}
+
+	if len(existing) == 0 {
+		return rr.UpdateReviewPointers(reviewID, sql.NullInt64{}, sql.NullInt64{}, sql.NullInt64{})
+	}
+
+	root := BuildTree(existing)
+
+	parent, side, node, err := walkPath(root, path)
+	if err != nil {
+		return err
+	}
+	if parent == nil {
+		return ErrEmptyPath
+	}
+	if node != nil {
+		return ErrPositionTaken
+	}
+
+	parentPtr := sql.NullInt64{Int64: int64(parent.Review.ReviewID), Valid: true}
+	if err := rr.UpdateReviewPointers(reviewID, sql.NullInt64{}, sql.NullInt64{}, parentPtr); err != nil {
+		return err
+	}
+	return rr.UpdateReviewChildPtr(int64(parent.Review.ReviewID), side, int64(reviewID))
 }

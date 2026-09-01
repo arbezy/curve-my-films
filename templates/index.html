@@ -18,6 +18,8 @@
       --blue:     #89b4fa;
       --green:    #a6e3a1;
       --red:      #f38ba8;
+      --peach:    #fab387;
+      --yellow:   #f9e2af;
     }
 
     body {
@@ -63,18 +65,30 @@
       gap: 0.6rem;
     }
 
+    .review-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex: 0 0 auto;
+    }
+
+    .edit-btn,
     .delete-btn {
       flex: 0 0 auto;
       width: 1.6rem;
       height: 1.6rem;
       padding: 0;
       line-height: 1;
-      background: var(--red);
+      font-size: 0.85rem;
       color: var(--mantle);
       border-radius: 50%;
       font-weight: bold;
     }
 
+    .edit-btn { background: var(--peach); }
+    .edit-btn:hover { background: var(--yellow); }
+
+    .delete-btn { background: var(--red); }
     .delete-btn:hover { background: var(--pink); }
 
     label { display: block; margin-bottom: 0.6rem; }
