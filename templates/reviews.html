@@ -4,7 +4,8 @@
   <ul>
     {{range .}}
       <li class="review-item">
-        <span>{{.MovieName}} — {{.Rating}}/10</span>
+        <span class="review-title">{{.MovieName}}</span>
+        <span class="review-rating"><span class="rating-number" style="--rating: {{.Rating}}">{{.Rating}}</span>/10</span>
         <span class="review-actions">
           <button
             type="button"

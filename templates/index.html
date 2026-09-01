@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <title>Curve My Films</title>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --base:     #1e1e2e;
@@ -25,7 +28,7 @@
     }
 
     body {
-      font-family: sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       max-width: 40rem;
       margin: 2rem auto;
       padding: 0 1rem;
@@ -63,8 +66,26 @@
     .review-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 0.6rem;
+    }
+
+    .review-title {
+      flex: 1 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .review-rating {
+      flex: 0 0 auto;
+      width: 5ch;
+    }
+
+    .rating-number {
+      --ratingpercent: calc(var(--rating) * 10%);
+      --ratingcolor: color-mix(in oklch, var(--red) var(--ratingpercent), var(--green));
+      color: var(--ratingcolor);
+      font-weight: bold;
     }
 
     .review-actions {
