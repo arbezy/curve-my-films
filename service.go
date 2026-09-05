@@ -101,7 +101,7 @@ func InsertReviewAtPath(rr *ReviewRepository, review *MovieReview, path []string
 
 // detachFromTree removes reviewID's node from its current rating tree, rewiring
 // Left/Right/Parent pointers on the surrounding nodes to preserve BST structure
-// (see DeleteNode). reviewID's own row is left untouched — its pointers are
+// (see DeleteNode). reviewID's own row is left untouched - its pointers are
 // stale once detached, so callers must either delete the row or overwrite its
 // pointers before it's read again. Returns the review as it stood (with its
 // pre-detach rating) for callers that still need that.
