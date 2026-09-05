@@ -252,6 +252,11 @@
     Load Reviews
   </button>
 
+  <input type="search" name="q" placeholder="Search reviews..."
+    hx-get="/ui/reviews"
+    hx-trigger="keyup changed delay:300ms, search"
+    hx-target="#review-list" hx-swap="innerHTML">
+
   <div id="review-list"></div>
 
   <hr>

@@ -94,6 +94,31 @@ func (rr *ReviewRepository) FetchReviewByID(reviewID int) (*MovieReview, error) 
 	return rev, nil
 }
 
+// search all reviews by movie name, and return 'like' matches.
+func (rr *ReviewRepository) SearchReviewsByName(searchQuery string) ([]*MovieReview, error) {
+	query := "SELECT * FROM reviews WHERE movie_name LIKE ?;"
+	results, err := rr.db.Query(query, searchQuery)
+
+	if err != nil {
+		return nil, err
+	}
+	defer results.Close()
+
+	reviews := []*MovieReview{}
+	if results.Next() {
+		rev := &MovieReview{}
+		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
+		if err != nil {
+			return nil, err
+		}
+		reviews = append(reviews, rev)
+	} else {
+		return nil, ErrReviewNotFound
+	}
+
+	return reviews, nil
+}
+
 // inserts a new review row and returns its generated review_id.
 func (rr *ReviewRepository) InsertReview(review *MovieReview) (int64, error) {
 	query := "INSERT INTO reviews (movie_name, rating, left_ptr, right_ptr, parent_ptr) VALUES (?, ?, ?, ?, ?);"

@@ -30,7 +30,15 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 func serveReviewsFragment(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s", r.Method, r.URL.Path)
 
-	revs, err := rr.FetchAllReviews()
+	searchQuery := r.URL.Query().Get("q")
+
+	var revs []*MovieReview
+	var err error
+	if searchQuery != "" {
+		revs, err = rr.SearchReviewsByName(searchQuery)
+	} else {
+		revs, err = rr.FetchAllReviews()
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
