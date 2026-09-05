@@ -2,11 +2,14 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 )
 
-var reviewColumns = []string{"review_id", "movie_name", "rating", "left_ptr", "right_ptr", "parent_ptr"}
+var reviewColumns = []string{"review_id", "movie_name", "rating", "left_ptr", "right_ptr", "parent_ptr", "created_at", "updated_at"}
+
+var testTimestamp = time.Date(2026, 9, 5, 12, 0, 0, 0, time.UTC)
 
 func newMockRepo(t *testing.T) (*ReviewRepository, sqlmock.Sqlmock) {
 	t.Helper()
@@ -44,7 +47,7 @@ func TestInsertReviewAtPath_ExistingTree_InsertsAtPath(t *testing.T) {
 	mock.ExpectQuery("SELECT * FROM reviews WHERE rating=?;").
 		WithArgs(8).
 		WillReturnRows(sqlmock.NewRows(reviewColumns).
-			AddRow(1, "Alien", 8, nil, nil, nil))
+			AddRow(1, "Alien", 8, nil, nil, nil, testTimestamp, testTimestamp))
 
 	mock.ExpectExec("INSERT INTO reviews (movie_name, rating, left_ptr, right_ptr, parent_ptr) VALUES (?, ?, ?, ?, ?);").
 		WillReturnResult(sqlmock.NewResult(2, 1))
@@ -69,13 +72,13 @@ func TestDeleteReviewByID_Leaf(t *testing.T) {
 	mock.ExpectQuery("SELECT * FROM reviews WHERE review_id=?;").
 		WithArgs(2).
 		WillReturnRows(sqlmock.NewRows(reviewColumns).
-			AddRow(2, "Alien 3", 8, nil, nil, 1))
+			AddRow(2, "Alien 3", 8, nil, nil, 1, testTimestamp, testTimestamp))
 
 	mock.ExpectQuery("SELECT * FROM reviews WHERE rating=?;").
 		WithArgs(8).
 		WillReturnRows(sqlmock.NewRows(reviewColumns).
-			AddRow(1, "Aliens", 8, 2, nil, nil).
-			AddRow(2, "Alien 3", 8, nil, nil, 1))
+			AddRow(1, "Aliens", 8, 2, nil, nil, testTimestamp, testTimestamp).
+			AddRow(2, "Alien 3", 8, nil, nil, 1, testTimestamp, testTimestamp))
 
 	mock.ExpectExec("UPDATE reviews SET left_ptr = ?, right_ptr = ?, parent_ptr = ? WHERE review_id = ?;").
 		WithArgs(nil, nil, nil, 1).
