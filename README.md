@@ -12,13 +12,9 @@ Aiming to use just the Go stdlib and htmx if I can (might have to add some JS if
 - A running MySQL server
 
 ### 1. Configure the database connection
-Create a `.env` file in the project root:
+Copy `.env.example` to `.env` and fill in your database credentials:
 ```
-DB_USERNAME="your_user"
-DB_PASSWORD="your_password"
-DB_NET="tcp"
-DB_ADDRESS="127.0.0.1:3306"
-DB_NAME="curvemyfilms"
+cp .env.example .env
 ```
 
 ### 2. Create the database and table
@@ -33,6 +29,8 @@ CREATE TABLE reviews (
   left_ptr   INT DEFAULT NULL,
   right_ptr  INT DEFAULT NULL,
   parent_ptr INT DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (review_id)
 );
 ```
