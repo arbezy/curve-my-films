@@ -16,6 +16,7 @@
       --surface2: #585b70;
       --text:     #cdd6f4;
       --subtext0: #a6adc8;
+      --subtext1: #878ca0;
       --mauve:    #cba6f7;
       --pink:     #f5c2e7;
       --blue:     #89b4fa;
@@ -75,11 +76,22 @@
       gap: 0.6rem;
     }
 
-    .review-title {
+    .review-info {
+      display: flex;
+      flex-direction: column;
       flex: 1 1 auto;
+      overflow: hidden;
+    }
+
+    .review-title {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .review-date {
+      font-size: 0.75rem;
+      color: var(--subtext1);
     }
 
     .review-rating {

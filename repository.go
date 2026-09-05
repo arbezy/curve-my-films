@@ -23,6 +23,7 @@ func GetDBConfig() *mysql.Config {
 	cfg.Net = config.DatabaseConfig.DB_NET
 	cfg.Addr = config.DatabaseConfig.DB_ADDRESS
 	cfg.DBName = config.DatabaseConfig.DB_NAME
+	cfg.ParseTime = true
 
 	return cfg
 }
@@ -47,7 +48,7 @@ func (rr *ReviewRepository) FetchAllReviews() ([]*MovieReview, error) {
 	reviews := []*MovieReview{}
 	for results.Next() {
 		rev := &MovieReview{}
-		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
+		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr, &rev.CreatedAt, &rev.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +67,7 @@ func (rr *ReviewRepository) FetchMovieReview(movieName string) (*MovieReview, er
 
 	rev := &MovieReview{}
 	if results.Next() {
-		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
+		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr, &rev.CreatedAt, &rev.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -83,7 +84,7 @@ func (rr *ReviewRepository) FetchReviewByID(reviewID int) (*MovieReview, error) 
 	row := rr.db.QueryRow(query, reviewID)
 
 	rev := &MovieReview{}
-	err := row.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
+	err := row.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr, &rev.CreatedAt, &rev.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, ErrReviewNotFound
 	}
@@ -107,7 +108,7 @@ func (rr *ReviewRepository) SearchReviewsByName(searchQuery string) ([]*MovieRev
 	reviews := []*MovieReview{}
 	if results.Next() {
 		rev := &MovieReview{}
-		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
+		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr, &rev.CreatedAt, &rev.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -227,7 +228,7 @@ func (rr *ReviewRepository) FetchReviewsByRating(rating int) ([]*MovieReview, er
 	reviews := []*MovieReview{}
 	for results.Next() {
 		rev := &MovieReview{}
-		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr)
+		err = results.Scan(&rev.ReviewID, &rev.MovieName, &rev.Rating, &rev.LeftPtr, &rev.RightPtr, &rev.ParentPtr, &rev.CreatedAt, &rev.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

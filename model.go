@@ -1,6 +1,9 @@
 package main
 
-import "database/sql"
+import (
+	"database/sql"
+	"time"
+)
 
 type MovieReview struct {
 	ReviewID  int           `json:"review_id"`
@@ -9,6 +12,8 @@ type MovieReview struct {
 	LeftPtr   sql.NullInt64 `json:"left_ptr"`
 	RightPtr  sql.NullInt64 `json:"right_ptr"`
 	ParentPtr sql.NullInt64 `json:"parent_ptr"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
 }
 
 type RatingTreeNode struct {

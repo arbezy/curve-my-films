@@ -46,6 +46,7 @@ func BuildTree(reviews []*MovieReview) *RatingTreeNode {
 
 // PrintTree writes an ASCII visualization of a rating tree to stdout,
 // rotated 90°: right subtree drawn above the node, left subtree below.
+// this is probs the most impressive code in this application.
 func PrintTree(root *RatingTreeNode) {
 	if root == nil {
 		fmt.Println("(empty tree)")
