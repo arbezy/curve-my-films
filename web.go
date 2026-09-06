@@ -367,9 +367,11 @@ type ratingRankingView struct {
 	Reviews []rankedReview
 }
 
+type Label string
 type rankedReview struct {
 	Rank   int
 	Review MovieReview
+	Label  Label
 }
 
 // serveRatingRanking renders the full ranking of films at one rating, highest to
@@ -389,14 +391,71 @@ func serveRatingRanking(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orderedReviews := InOrderDescending(BuildTree(reviews))
+	orderedReviews := InDescendingOrder(BuildTree(reviews))
 	rankedReviews := make([]rankedReview, len(orderedReviews))
 	for i, rev := range orderedReviews {
-		rankedReviews[i] = rankedReview{i + 1, rev}
+		rankedReviews[i] = rankedReview{Rank: i + 1, Review: rev}
 	}
+	rankedReviews = labelRankedReviews(rankedReviews)
+
 	view := ratingRankingView{Rating: rating, Reviews: rankedReviews}
 
 	if err := templates.ExecuteTemplate(w, "rating_ranking.html", view); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+const (
+	vhigh Label = "Very High"
+	high  Label = "High"
+	med   Label = "Mid"
+	low   Label = "Low"
+	vlow  Label = "Very Low"
+)
+
+func labelRankedReviews(reviews []rankedReview) []rankedReview {
+	n := len(reviews)
+	labelledReviews := make([]rankedReview, n)
+	copy(labelledReviews, reviews)
+	for i := range labelledReviews {
+		labelledReviews[i].Label = med
+	}
+
+	if n < 3 {
+		return reviews
+	} else if n == 3 || n == 4 {
+		labelledReviews[0].Label = high
+		labelledReviews[n-1].Label = low
+	} else {
+		// split into 5 groups and add remainder to the middle if <= 2, if <= 4 then add a high and low
+		splits := []int{5, 20, 50, 20, 5}
+		labelBuckets := make([]int, 5)
+		allocated := 0
+		for i := range splits {
+			bucketSize := n / (100 / splits[i])
+			labelBuckets[i] = bucketSize
+			allocated += bucketSize
+		}
+
+		rem := n - allocated
+		if rem > 0 {
+			if rem <= 2 {
+				labelBuckets[2] += rem
+			} else {
+				labelBuckets[1] += 1
+				labelBuckets[2] += rem - 2
+				labelBuckets[3] += 1
+			}
+		}
+
+		idx := 0
+		labels := []Label{vhigh, high, med, low, vlow}
+		for j, v := range labelBuckets {
+			for range v {
+				labelledReviews[idx].Label = labels[j]
+				idx += 1
+			}
+		}
+	}
+	return labelledReviews
 }

@@ -6,7 +6,7 @@
   {{range .Reviews}}
   <li>
     <span class="rank">{{.Rank}}</span>
-    <span>{{.Review.MovieName}}</span>
+    <span class="rank-label">{{.Label}}</span><span>{{.Review.MovieName}}</span>
   </li>
   {{end}}
 </ol>

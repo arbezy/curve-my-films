@@ -90,13 +90,13 @@ func nodeLabel(node *RatingTreeNode) string {
 
 // InOrderDescending returns every review in root's tree ordered highest to lowest,
 // i.e. best to worst (right subtree = better, per the comparison flow's convention).
-func InOrderDescending(root *RatingTreeNode) []MovieReview {
+func InDescendingOrder(root *RatingTreeNode) []MovieReview {
 	if root == nil {
 		return nil
 	}
-	reviews := InOrderDescending(root.Right)
+	reviews := InDescendingOrder(root.Right)
 	reviews = append(reviews, root.Review)
-	return append(reviews, InOrderDescending(root.Left)...)
+	return append(reviews, InDescendingOrder(root.Left)...)
 }
 
 // findNode returns the node with the given review ID within root's subtree, or nil.
