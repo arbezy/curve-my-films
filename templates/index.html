@@ -30,11 +30,30 @@
 
     body {
       font-family: 'JetBrains Mono', monospace;
-      max-width: 40rem;
+      max-width: 64rem;
       margin: 2rem auto;
       padding: 0 1rem;
       background: var(--base);
       color: var(--text);
+    }
+
+    .layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    .col-left,
+    .col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    @media (max-width: 640px) {
+      .layout { flex-direction: column; }
     }
 
     h1 .word-1 { color: var(--mauve); }
@@ -65,7 +84,7 @@
     button:hover { background: var(--subtext0); }
 
     #review-list {
-      max-height: 18rem;
+      max-height: 44rem;
       overflow-y: auto;
       padding-right: 0.4rem;
     }
@@ -260,31 +279,35 @@
 <body>
   <h1><span class="word-1">Curve</span> <span class="word-2">My</span> <span class="word-3">Films</span></h1>
 
-  <button hx-get="/ui/reviews" hx-target="#review-list" hx-swap="innerHTML">
-    Load Reviews
-  </button>
+  <div class="layout">
+    <div class="col-left">
+      <button hx-get="/ui/reviews" hx-target="#review-list" hx-swap="innerHTML">
+        Load Reviews
+      </button>
 
-  <input type="search" name="q" placeholder="Search reviews..."
-    hx-get="/ui/reviews"
-    hx-trigger="keyup changed delay:300ms, search"
-    hx-target="#review-list" hx-swap="innerHTML">
+      <input type="search" name="q" placeholder="Search reviews..."
+        hx-get="/ui/reviews"
+        hx-trigger="keyup changed delay:300ms, search"
+        hx-target="#review-list" hx-swap="innerHTML">
 
-  <div id="review-list"></div>
+      <div id="review-list"></div>
+    </div>
 
-  <hr>
+    <div class="col-right">
+      <button hx-get="/ui/add-review" hx-target="#add-review-panel" hx-swap="innerHTML">
+        Add Review
+      </button>
 
-  <button hx-get="/ui/add-review" hx-target="#add-review-panel" hx-swap="innerHTML">
-    Add Review
-  </button>
+      <div id="add-review-panel"></div>
 
-  <div id="add-review-panel"></div>
+      <hr>
 
-  <hr>
+      <button hx-get="/ui/rating-breakdown" hx-target="#rating-breakdown-panel" hx-swap="innerHTML">
+        Show Rating Breakdown
+      </button>
 
-  <button hx-get="/ui/rating-breakdown" hx-target="#rating-breakdown-panel" hx-swap="innerHTML">
-    Show Rating Breakdown
-  </button>
-
-  <div id="rating-breakdown-panel"></div>
+      <div id="rating-breakdown-panel"></div>
+    </div>
+  </div>
 </body>
 </html>
