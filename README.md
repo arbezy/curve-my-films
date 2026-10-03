@@ -5,6 +5,8 @@ The goal is to create a reviewing app that will prompt a user to rank films with
 
 Aiming to use just the Go stdlib and htmx if I can (might have to add some JS if unavoidable), as I think it is more interesting and a better learning opportunity. Who even needs a framework in go anyway.
 
+<img width="3502" height="1934" alt="image" src="https://github.com/user-attachments/assets/db66acca-d89f-44cc-9c25-54d5e68d93dd" />
+
 ## Setup
 
 ### Prerequisites
